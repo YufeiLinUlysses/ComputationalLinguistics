@@ -1,0 +1,8 @@
+he is: 0.022003034901365705
+she is: 0.020833333333333332
+she ate: 0
+it was a little thing: 0.0
+the earth trembled: 0.0
+the night was quiet: 0.0
+a man appeared: 0.0001204585733274258
+the old man: 0.0011411785838819093

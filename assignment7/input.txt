@@ -1,0 +1,10 @@
+asylum-madhouse
+bird-crane
+cemetery-woodland
+coast-forest
+furnace-stove
+journey-voyage
+lad-brother
+lad-wizard
+monk-oracle
+noon-string

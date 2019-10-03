@@ -1,0 +1,565 @@
+ \documentclass[a4paper,12pt]{report}
+
+%Packages Used
+\usepackage{amssymb,latexsym,amsmath}     % Standard packages
+\usepackage{setspace}
+\usepackage{sectsty}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{graphics,graphicx}
+\usepackage{tikz}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{esvect}
+\usepackage{hyperref}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+
+\bookmarksetup{
+  numbered,
+  open
+}
+\renewcommand*{\thesection}{\arabic{section}}
+\onehalfspacing
+
+%Margins
+\addtolength{\textwidth}{1.0in}
+\addtolength{\textheight}{1.00in}
+\addtolength{\evensidemargin}{-0.75in}
+\addtolength{\oddsidemargin}{-0.75in}
+\addtolength{\topmargin}{-.50in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Theorem/Proof Environments %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheorem{theorem}{Theorem}
+\newenvironment{proof}{\noindent{\bf Proof:}}{$\hfill \Box$ \vspace{10pt}}
+\sectionfont{\fontsize{12}{15}\selectfont}
+\titlespacing*{\section}{0.5pt}{0.25\baselineskip}{0.25\baselineskip}
+
+\begin{document}
+\noindent
+Yufei Lin\\
+
+\noindent
+Final Project\\
+
+\noindent
+May \(13^{th}\) 2019\\
+
+\noindent
+Computational Linguistics
+
+\begin{center}
+\textbf{Information Extraction} 
+\end{center}
+
+\noindent
+This document is a note on my reading of the textbook \textit{Speech and Language Processing}. Therefore, most example tables and graphs comes from the book, unless otherwise stated.\\
+
+\noindent
+\textbf{I. Named Entity Recognition}\\
+
+\noindent
+\textbf{i. Definition}
+
+\begin{enumerate}
+\item \textbf{Named Entity:} Anything that can be referred to with a proper name.
+\item \textbf{Named Entity Recognition(NER):} The combined task of finding spans of text that constitute proper names and then classifying the entities being referred to according to their type. 
+\item \textbf{Temporal Expressions:} Dates, times, named events
+\item \textbf{Numerical Expressions:} Measurements, counts, prices
+\item \textbf{Long Short-Term Memory (LSTM):} It divides the context management problem into two sub-problems: removing information no longer needed from the context, and adding information likely to be needed for later decision making.
+\item \textbf{Conditional Random Field(CRF):} A class of statistical modeling method often applied in pattern recognition and machine learning and used for structured prediction.
+\end{enumerate}
+
+\noindent
+\textbf{ii. Concept}
+
+\noindent
+\textbf{(1)Ambiguity}
+\begin{enumerate}
+\item One word have different meaning in one category.
+\item One word have being in different categories. 
+\end{enumerate}
+
+\noindent
+\textbf{(2) NER as Sequence Labelling}
+
+\noindent
+\textbf{IOB Labelling:} Label text with inside a name or entity, beginning of a word and outside a name or entity.\\
+
+\noindent 
+\textbf{iii. Algorithm}
+
+\noindent
+\textbf{(1)A Feature-Based Algorithm for NER}
+
+\noindent
+The chart below shows the most frequent used features in a feature-based NER algorithm:
+\begin{table}[h]
+\begin{tabular}{l l}
+\hline 
+ \textbf{Feature} & \textbf{Explanation}  \\
+ \hline 
+ Lexical Items & The token to be labeled \\  
+ Stemmed Lexical Items & Stemmed version of the target token\\
+ Shape & The orthographic pattern of the target word	 \\
+ Character Affixes & Character level affixes of the target and surrounding words  \\
+ Part of Speech & Part of speech of the word \\
+ Syntactic Chunk Labels & Base phrase chunk label\\
+ Gazetteer or Name List & Presence of the word in one or more named entity lists\\
+ Predictive Tokens & Presence of predictive words in surrounding text\\
+ Bag of Words/Bags of N-Grams & Words and/or N-Grams occurring in the surrounding texts    
+\end{tabular}
+\caption{\label{tab:table-name}Features in an NER System}
+\end{table}
+
+\noindent
+Shapes are usually defined by cases, punctuations, numbers, etc. The instances are shown as follows: 
+\begin{table}[h]
+\centering
+\begin{tabular}{l | l | l} 
+ \textbf{Shape} & \textbf{Example} & \textbf{Regex (Written by Me)}  \\
+ \hline 
+ Lower & cummings & \verb/^[a-z]+$/\\  
+ Capitalized & Washington & \verb/^[A-Z][a-z]+$/\\
+ All caps & IRA & \verb/^[A-Z]+$/ \\
+ Mixed Case & eBay & \verb/^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z]*$/\\
+ Capitalized Initial with Period & U.S.A. & \verb/^([A-Z]\.){1,}$/\\
+ Ends in Digit & A9 & \verb/^[a-z]+\d+$/\\
+ Contains Hyphen & H-9 & \verb/^[a-zA-Z0-9]+\-[a-zA-Z0-9]+$/
+\end{tabular}
+\caption{\label{tab:table-name}Shape Feature, Explained with Regex}
+\end{table}
+
+\noindent
+The process of building a feature-based NER is as follows:
+\begin{enumerate}
+\item Obtain the most effective name-list (for instance, gazetteers - a list of location names)
+\item Mark the sentence with IOB Labelling
+\item Offer a context score to judge the type of the entity
+\item Tag the words and output 
+\end{enumerate}
+
+\noindent 
+\textbf{(2) A Neural Algorithm for NER}
+
+\noindent
+The standard neural algorithm for NER is the bi-LSTM. In this model, word and character embeddings are computed for input word $w_i$. These input words are passed through a left-to-right LSTM and a right-to-left LSTM in order to obtain a single output layer at position $i$. This single output layer is then passed onto a softmax that creates a probability distribution over all tags. Then, we would choose the most likely tag $t_i$.\\
+
+\noindent
+One architectural example is named as "Bidirectional LSTM-CRF Models for Sequence Tagging":
+
+\noindent
+First, use two LSTMs, one reading each word in a sentence from beginning to end and another reading the same but from end to beginning, producing for each word, a vector representation made from both the un-folded LSTM (i.e., forward and backward) read up to that word. There is this intuition that the vector for each word will take into account the words read/seen before, on both directions.
+
+\noindent
+This bidirectional-LSTM architecture is then combined with a CRF layer at the top. A Conditional Random Field (CRF) layer has a state transition matrix as parameters, which can be used to efficiently use past attributed tags in predicting the current tag.
+
+\begin{figure}[h]
+\centering	
+\includegraphics[width=10cm, height=5cm]{"pic1"}
+\caption{Neural Algorithm for NER}
+\end{figure}
+
+\noindent 
+\textbf{(3) Rule-Based NER}
+
+\noindent 
+This approach is more suitable for commercial use of NER and the procedure is as follows: 
+\begin{enumerate}
+\item First, use high-precision rules to tag unambiguous entity mentions.
+\item Then, search for substring matches of the previously detected names.
+\item Consult application-specific name lists to identify likely name entity mentions
+from the given domain.
+\item Finally, apply probabilistic sequence labeling techniques that make use of the
+tags from previous stages as additional features.\\
+\end{enumerate}
+
+\noindent 
+\textbf{iv. Evaluation of NER}
+
+\noindent
+The following methods are used to evaluate different perspectives of an NER system:
+\begin{itemize}
+\item \textbf{Recall: } The ratio of the number correctly labeled responses to the total that should have been labeled
+\item \textbf{Precision: }The ratio of the number of correctly labeled responses to the total labeled
+\item \textbf{F-Measure} Harmonic mean of recall and precision
+\end{itemize}
+
+\noindent
+Thus, by looking at the output of these three methods, we could know that whether we are having an accurate output from our program. \\
+
+\noindent
+\textbf{v. Implementation}
+
+\noindent
+Packages involved: bf4, request, re.
+
+\noindent
+\textbf{(1) input}
+
+\noindent
+This implementation takes in an input from an online source. Then, by using beautifulsoup, we could obtain a string and the string is our input. Url is given in a .txt. And we only takes in one url for this demo. 
+
+\noindent
+\textbf{(2) code}
+
+\noindent
+../code/getOnlineText.py
+
+\noindent
+../code/namedEntityRecognition.py
+
+\noindent
+../code/nerOnAnArticle.py
+
+\noindent
+\textbf{(3) output}
+
+\noindent
+A list of count of entities in .txt.
+
+\noindent
+\textbf{(4) Improvement}
+
+\noindent
+If I have more time, I would make a more precise model, especially for the IOB system.  Also, I need to improve my beautifulsoup algorithm so that I can get a proper string. It sometimes gives me some phrases that are not suppose to be together. Also, I can't identify entities if they are separated by comma(i.e. John, Peter, Mary). I would recognize those as one entity. I still haven't figure out a way, maybe because of my regex or there should be a whole other system identifying them. \\
+
+\noindent
+Here is an online implementation of NER system with packages named NLTK and SpaCy: 
+\textcolor{blue}{https://towardsdatascience.com/named-entity-recognition-with-nltk-and-spacy-8c4a7d88e7da}
+
+
+\pagebreak
+\noindent
+\textbf{II. Relation Extraction}\\
+
+\noindent
+\textbf{i. Definition}
+\begin{enumerate}
+\item \textbf{Relation Description Framework (RDF): }A framework that stores the information of the relationship of different words
+\item \textbf{RDF Triple: }A tuple of entity-relation-entity
+\item \textbf{is-a/Hypernym Relation: }An interclass relationship between words. One instance would be "Giraffe is-a ruminant is-a ungulate is-a mammal is-a vertebrate"
+\item \textbf{Five Main Classes of Algorithms for Relation Extraction: }Hand-written patterns, supervised machine learning, semi-supervised (via bootstrapping and via distant supervision), and unsupervised.
+\end{enumerate}
+
+\noindent
+\textbf{ii. Algorithm}
+
+\noindent
+\textbf{(1) Using Patterns to Extract Relations}
+
+\noindent
+Lexical-syntactic patterns is the most widely used algorithm. However, this accurate algorithm heavily relies on hand-built patterns, meaning they are hard to create. The followings are examples of some hand-written rules:
+
+\begin{table}[h]
+\begin{tabular}{l l}
+\hline 
+ \textbf{Pattern} & \textbf{Example(Blued ones are higher hypernyms)}  \\
+ \hline 
+ NP$\{,\text{NP}\}$*$\{,\}(and|or)$ other $\text{NP}_H$& temples, treasuries, and other important \textcolor{blue}{civic buildings} \\  
+$\text{NP}_H$ such as $\{\text{NP,}\}$*$\{,\}\{(or|and)\}$ NP & \textcolor{blue}{red algae} such as Gelidium\\
+such $\text{NP}_H$ as $\{\text{NP,}\}$*$\{,\}\{(or|and)\}$ NP & such \textcolor{blue}{authors} as Herrick, Goldsmith, and Shakespeare	 \\
+ $\text{NP}_H \{,\} \text{including} \{\text{NP,}\}$*$\{(or|and)\}$ NP & \textcolor{blue}{common-law countries}, including Canada and England  \\
+ $\text{NP}_H \{,\} \text{especially} \{\text{NP,}\}$*$\{(or|and)\}$ NP & \textcolor{blue}{European countries}, especially France, England, and Spain
+\end{tabular}
+\caption{\label{tab:table-name}Patterns in a Relation Extraction System}
+\end{table}
+
+\pagebreak
+\noindent
+\textbf{(2) Relation Extraction via Supervised Learning}
+
+\noindent
+The procedure is as follows:
+
+\begin{enumerate}
+\item Choose a hand-annotated training corpus with the relations and entities
+\item Use the annotated texts to train classifiers, usually a feature-based classifer like logistic regression or random forests, to annotate an unseen test set
+\item A classifier is trained to assign a label to the relations that were found by step 2
+\end{enumerate}
+
+\begin{figure}[h]
+\centering	
+\includegraphics[width=16cm, height=5cm]{"pic2"}
+\caption{Finding and classifying the relations among entities in a text}
+\end{figure}
+
+\noindent
+\textbf{(3) Semisupervised Relation Extraction via Bootstrapping}
+
+\noindent
+Bootstrap takes in a few high-precision seed patterns or a few seed tuples as classifiers. Then, it takes the entities in the seed pair, and find sentences contain both entities. From all these new sentences, we extract and generalize the context around the entities to learn new patterns. The basic algorithm is as follows: 
+
+\begin{figure}[h]
+\centering	
+\includegraphics[width=16cm, height=6.5cm]{"pic3"}
+\caption{Bootstrapping Algorithm}
+\end{figure} 
+
+\pagebreak
+\noindent
+\textbf{(4) Distant Supervision for Relation Extraction}
+
+\noindent
+Distant supervision applies a large database as source of seed examples in order to create a lot of pattern features from all these examples. Then we put these examples in a supervised classifier. 
+
+\begin{figure}[h]
+\centering	
+\includegraphics[width=17cm, height=6.5cm]{"pic4"}
+\caption{Distant Supervision Algorithm}
+\end{figure}
+
+\noindent
+\textbf{(5) Unsupervised Relation Extraction}
+
+\noindent
+Unsupervised learning of relation extraction means to extract relations from the web. This system is also known as an OpenIE. One implementation is \textbf{ReVerb} system, using the following steps to complete an unsupervised learning: 
+\begin{enumerate}
+\item Run a part-of-speech tagger and entity chunker over $s$.
+\item For each verb in $s$, find the longest sequence of words $w$ that start with a verb and satisfy syntactic and lexical constraints, merging adjacent matches.
+\item For each phrase $w$, find the nearest noun phrase $x$ to the left which is not a relative pronoun, wh-word or existential “there”. Find the nearest noun phrase $y$ to the right.
+\item Assign confidence $c$ to the relation $r = (x, w , y)$ using a confidence classifier and return it.
+\end{enumerate}
+
+\noindent
+\textbf{iii. Evaluation of Relation Extraction}
+
+\noindent
+For supervised learning of relation extraction, we would just be simply looking at the accuracy of the test cases. On the other hand, for both semi-supervised and unsupervised learnings, of which produce new relations from the web or a large text, we would be looking at the accuracy with the following method:
+
+\noindent
+Have a human check the accuracy of a pile of randomly pulled out relations. For instance, we can input a sentence with known relations and then check whether the system could comprehend and give out the relation. Then, we could get an estimated accuracy, stating:\[P = \frac{\text{the number of correct relations}}{\text{total number of relations}}\]\\
+
+\noindent
+\textbf{iv. Implementation}
+
+\noindent
+This implementation is based on the notion of an openIE system. Therefore, I am extracting relations from a given online text and tag their relations with my ideal way of extracting relations. This algorithm relies on a package named NLTK, and an NER system, which I have written myself. The algorithm is as following: 
+\begin{enumerate}
+\item Unpack the entire paragraph into separate sentences.
+\item Get all the entities from the sentences.
+\item Get the verbs from the sentences.
+\item Find the first entity of the sentence and regard it as the subject, then find the last possible entity and the last possible verb between the two entities. 
+\item Output the relationship. 
+\end{enumerate}
+
+\noindent
+\textbf{(1) input}
+
+\noindent
+Takes in a text file. In this example, still the same one as the previous demo.
+
+\noindent
+\textbf{(2) code}
+
+\noindent
+../code/getOnlineText.py
+
+\noindent
+../code/namedEntityRecognition.py
+
+\noindent
+../code/relationExtraction.py
+
+\noindent
+../code/rEDemo.py
+
+\noindent
+\textbf{(3) Output}
+
+\noindent
+A file that contains all the relationships.
+
+\noindent
+\textbf{(4) Improvement}
+
+\noindent
+The accuracy for finding relation needs to be increased. Furthermore, the determination of what is a relation needs to be more abstract. 
+
+\pagebreak
+\noindent
+\textbf{III. Extracting Times}\\
+
+\noindent
+\textbf{i. Definition}
+
+\begin{enumerate}
+\item \textbf{Absolute Temporal Expression: }Expressions that can be marked directly to calendar dates, times of day, or both.
+\item \textbf{Relative Temporal Expressions: }Particular times through some other reference point, like a week from last Tuesday.
+\item \textbf{Durations: }This denotes the span of time at varying level of granularity. 
+\item \textbf{Temporal Anchor: }Most temporal expressions in news articles are incomplete and are only implicitly anchored, often with respect to the dateline of the article.
+\end{enumerate}
+
+\noindent
+\textbf{ii. Concept}
+
+\noindent
+\textbf{(1) Temporal Expression Extraction}
+
+\noindent
+Temporal expressions have lexical triggers, examples are as following, as their head. Then, we need to identify the end of this expression. We usually take a rule-based approach to comprehend these expressions. This method usually applies cascades of automata to recognize
+patterns at increasing levels of complexity. 
+ 
+\begin{table}[h]
+\centering
+\begin{tabular}{l l}
+\hline 
+ \textbf{Category} & \textbf{Example}  \\
+ \hline 
+ Noun & \textit{morning, noon, night, winter, dusk, dawn} \\  
+Proper Noun & \textit{January, Monday, Ides, Easter, Rosh Hashana, Ramadan, Tet}\\
+Adjective & \textit{recent, past, annual, former}	 \\
+ Adverb & \textit{hourly, daily, monthly, yearly}
+\end{tabular}
+\caption{\label{tab:table-name}Temporal Expression Headers}
+\end{table}
+
+\noindent
+A second way is to use a Sequence-labelling system, like IOB to tag all the words in order to obtain temporal expressions. Example features are as follows: 
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l}
+\hline 
+ \textbf{Feature} & \textbf{Explanation}  \\
+ \hline 
+ Token & The target token to be labeled \\  
+Tokens in window & Bag of tokens in the window around a target\\
+Shape & Character shape features	 \\
+ POS & Parts of speech of target and window words\\
+ Chunk tags & Base-phrase chunk tag for target and words in a window\\
+ Lexical triggers & Presence in a list of temporal terms
+\end{tabular}
+\caption{\label{tab:table-name}Temporal Expression Headers}
+\end{table}
+
+\pagebreak
+\noindent
+\textbf{(2) Temporal Normalization}
+
+\noindent
+Temporal normalization is the process of mapping a temporal expression to either a specific point in time or to a duration. Normalized times are represented with the VALUE attribute from the ISO 8601 standard for encoding temporal values. Some ISO patterns are shown in the following: 
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l l}
+\hline 
+ \textbf{Unit} & \textbf{Pattern} & \textbf{Sample Value}  \\
+ \hline 
+ Fully specified dates & YYYY-MM-DD & 1991-09-28 \\  
+Weeks & YYYY-$\text{Wnn}$ & 2007-W27\\
+Weekends & PnWE & P1WE	 \\
+ 24-hour clock times & HH:MM:SS & 11:13:45\\
+ Dates and times & YYYY-MM-DDTHH:MM:SS & 1991-09-28T11:00:00\\
+ Financial quarters & Qn & 1999-Q3
+\end{tabular}
+\caption{\label{tab:table-name}ISO Time Patterns}
+\end{table}
+
+\noindent
+Fully qualified date expressions contain a year, month, and day in some conventional form.\\
+
+\pagebreak
+\noindent
+\textbf{IV. Extracting Events and their Times}\\
+
+\noindent
+\textbf{i. Definition}
+\begin{enumerate}
+\item \textbf{Event Extraction: }Identify mentions of events in texts. It is generally modeled via supervised learning, detecting events
+via sequence models with IOB tagging, and assigning event classes and attributes with multi-class classifiers.
+\item \textbf{Classification of Events: }Actions, States, Reporting Events, Perception Events, etc. 
+\item \textbf{Common Features Used for Event Extraction: } In the table below: 
+\end{enumerate}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l}
+\hline 
+ \textbf{Feature} & \textbf{Explanation}  \\
+ \hline 
+ Character Affixes & Character-level prefixes and suffixes of target word \\  
+Nominalization suffix & Character level suffixes for nominalizations (e.g., $-tion$)	 \\
+ Part of speech & Part of speech of the target word\\
+ Light verb & Binary feature indicating that the target is governed by a light verb\\
+ Subject syntactic category & Syntactic category of the subject of the sentence\\
+ Morphological stem & Stemmed version of the target word sentence\\
+ Verb root & Root form of the verb basis for a nominalization\\
+ WordNet hypernyms & Hypernym set for the target
+\end{tabular}
+\caption{\label{tab:table-name}Common Features for Event Extraction}
+\end{table}
+
+\pagebreak 	
+\noindent
+\textbf{ii. Concept}
+
+\textbf{(1) Temporal Ordering of Events}
+
+Determining ordering of events can be viewed as a binary relation detection and classification task. All temporal relations between events are classified into one of the standard set of Allen relations, which is shown in the following figure: 
+
+\begin{figure}[h]
+\centering	
+\includegraphics[width=16cm, height=17cm]{"pic5"}
+\caption{Finding and classifying the relations among entities in a text}
+\end{figure}
+
+\pagebreak
+\noindent
+\textbf{V. Template Filling}\\
+
+\noindent
+\textbf{i. Definition}
+\begin{enumerate}
+\item \textbf{Scripts: }Consists prototypical sequences of sub-events, participants, and their roles
+\item \textbf{Template: }Consists of fixed sets of slots that take as values slot-fillers belonging to particular classes
+\item \textbf{Template Filling: }Find documents that invoke particular scripts and then fill the slots in the associated templates with fillers extracted from the text
+\item \textbf{Finite State Transducer(FST): }It provides a method for performing mathematical operations on ordered collections of context-sensitive rewrite rules such as those commonly used to implement fundamental natural language processing tasks.
+\end{enumerate}
+\noindent
+\textbf{ii. Concept}
+
+\noindent
+\textbf{(1) Machine Learning Approaches to Template Filling}
+
+\noindent
+In the standard paradigm for template filling, we are trying to fill fixed known templates with known slots, and also assumes training documents labeled with examples of each template, and the fillers of each slot marked in the text.
+
+\noindent
+There are two system handling this task, the first one is template recognition, and the other one is role-filler extraction. Template recognition can be treated as a text classification task, with features extracted from every sequence of words that was labeled
+in training documents as filling any slot from the template being detected. Role-filler extraction is a separate classifier trained to detect each role (LEAD- AIRLINE, AMOUNT, and so on). This can be a binary classifier that is run on every noun-phrase in the parsed input sentence, or a sequence model run over sequences of words.\\
+
+\noindent
+\textbf{(2) Earlier Finite-State Template-Filling Systems}
+
+\noindent
+Early systems for dealing with these complex templates were based on cascades of transducers based on hand-written rules. The first four stages use hand-written regular expression and grammar rules to
+do basic tokenization, chunking, and parsing. Stage 5 then recognizes entities and events with a FST-based recognizer and inserts the recognized objects into the appropriate slots in templates. \\
+
+\pagebreak
+\begin{center}
+\textbf{Bibliography}
+\end{center}
+
+\noindent
+Jurafsky, Daniel, and James H. Martin. \textit{Speech and Language Processing}. 3rd ed., 2018.\\
+
+\noindent
+Li, Susan, and Susan Li. “Named Entity Recognition with NLTK and SpaCy.” \textit{Towards} 
+
+\textit{Data Science}, Towards Data Science, 17 Aug. 2018, towardsdatascience.com/named-
+
+entity-recognition-with-nltk-and-spacy-8c4a7d88e7da.\\
+
+
+\noindent
+\textit{Named-Entity Recognition Based on Neural Networks}, www.davidsbatista.net/blog/2018/10/22/Neural
+
+-NER-Systems/.
+
+\end{document}

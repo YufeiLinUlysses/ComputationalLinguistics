@@ -1,0 +1,15 @@
+a: total is: 170 discussion foreign maniac dreadful shriek tired deadly passionate monstrosity roof quadruped maddening violence chair parable bar stone human spasm last thunderbolt terrible street hair hint grey furious constable coincidence final mood dull paragraph momentary bubble - back desperate sound rigid superb better manner consultation decided suggestion monstrous class window colourless london shopkeeper comic song mistake mouse tree map highland soldier cold wicked pistol day blank characteristic serious deep revolution bursting yard bow walking shrill distant loud county wood rude silent solitary blue complete field lean jolly scientific special nice sign mass lady hearty motor general message sergeant daughter common schoolboy black tower stunned poor wash dangerous thousand pavement mystic ring space coward rat hammer sufficiently dreary pale newspaper stout cannon line casual habit simple peculiar devil crack madman jar lie mask much crooked burst dry penny theatre native savage friend ladder well slim double key tone hand sneer distance bright flower fixed soul pleasure mixture medical is wedge period mortal corner shake certificate daffodil provocation cosy cornfield copyright refund trademark 
+total bigram: 2
+
+the: total is: 3 ball earth sea 
+total bigram: 25
+
+she: total is: 10 is who cried were sighed added put flung looked still 
+total bigram: 2
+
+he: total is: 1 had 
+total bigram: 146
+
+they: total is: 6 do felt did can seemed don 
+total bigram: 5
+
